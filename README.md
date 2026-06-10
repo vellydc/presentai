@@ -1,4 +1,4 @@
-# VocaLIFT
+# VocaLift
 
 AI-powered presentation skills coach. Single-page app — type or record your presentation, get instant structured feedback (structure, clarity, opening/closing, improvement suggestions) powered by Claude.
 

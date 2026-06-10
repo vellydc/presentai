@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PresentAI – AI Presentation Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    /* ── Design tokens ─────────────────────────────── */
+    :root {
+      --paper:   #F6F4F1;
+      --stone:   #E4DED2;
+      --surface: #FFFFFF;
+      --border:  #D5CFC3;
+
+      --coral:       #F95C4B;
+      --coral-dark:  #E0422F;
+      --coral-light: #FFF1EF;
+      --coral-glow:  rgba(249,92,75,.13);
+
+      --ink:   #000000;
+      --ink-2: #3A3630;
+      --ink-3: #8C8078;
+
+      --r:    16px;
+      --r-sm: 10px;
+      --r-xs:  7px;
+      --r-lg: 22px;
+
+      --sh-sm: 0 1px 3px rgba(40,25,15,.05);
+      --sh:    0 2px 8px rgba(40,25,15,.07), 0 1px 2px rgba(40,25,15,.04);
+      --sh-md: 0 4px 20px rgba(40,25,15,.07), 0 1px 4px rgba(40,25,15,.04);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--stone);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-mark {
+      width: 40px; height: 40px;
+      background: var(--coral);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 12px rgba(249,92,75,.28);
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .brand p {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .header-chip {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 11px;
+      border-radius: 99px;
+      background: var(--stone);
+      border: 1px solid var(--border);
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Main wrapper ────────────────────────────────── */
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 30px 22px 56px;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* ── API Key bar ─────────────────────────────────── */
+    .api-bar {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 12px 16px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--sh-sm);
+    }
+
+    .api-icon-box {
+      width: 34px; height: 34px;
+      background: var(--stone);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .api-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-2);
+      white-space: nowrap;
+    }
+
+    .api-field-wrap { flex: 1; position: relative; }
+
+    .api-field {
+      width: 100%;
+      padding: 9px 38px 9px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-xs);
+      font-size: 13px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      color: var(--ink);
+      background: var(--paper);
+      outline: none;
+      transition: border-color .18s, box-shadow .18s, background .18s;
+    }
+    .api-field:focus {
+      border-color: var(--coral);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px var(--coral-glow);
+    }
+    .api-field::placeholder { color: var(--ink-3); font-family: inherit; font-size: 12px; }
+
+    .eye-toggle {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-3); font-size: 14px; padding: 2px;
+      transition: color .15s; line-height: 1;
+    }
+    .eye-toggle:hover { color: var(--ink-2); }
+
+    .secure-note {
+      font-size: 11px;
+      color: var(--ink-3);
+      display: flex; align-items: center; gap: 4px;
+      white-space: nowrap;
+    }
+
+    /* ── Grid ────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 880px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card ────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-md);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 16px 20px;
+      border-bottom: 1.5px solid var(--stone);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .title-icon {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    /* ── Language switcher ───────────────────────────── */
+    .lang-switch {
+      display: flex;
+      background: var(--paper);
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: 2px;
+    }
+
+    .lang-opt {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 13px;
+      border-radius: 99px;
+      border: none;
+      cursor: pointer;
+      background: none;
+      color: var(--ink-3);
+      transition: all .2s;
+      letter-spacing: 0.01em;
+    }
+    .lang-opt.on {
+      background: var(--surface);
+      color: var(--coral);
+      box-shadow: var(--sh-sm);
+    }
+
+    /* ── Textarea ────────────────────────────────────── */
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 330px;
+      padding: 20px;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 15px;
+      line-height: 1.78;
+      color: var(--ink);
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: transparent;
+      letter-spacing: 0.01em;
+    }
+    textarea::placeholder { color: var(--ink-3); line-height: 1.7; }
+
+    /* ── Input bottom bar ────────────────────────────── */
+    .input-bar {
+      padding: 11px 14px;
+      border-top: 1.5px solid var(--stone);
+      background: var(--stone);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Mic button ──────────────────────────────────── */
+    .mic-btn {
+      width: 40px; height: 40px;
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--ink-2);
+      font-size: 17px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all .2s;
+    }
+    .mic-btn:hover {
+      border-color: var(--coral);
+      color: var(--coral);
+      box-shadow: 0 0 0 4px var(--coral-glow);
+    }
+    .mic-btn.recording {
+      border-color: var(--coral);
+      background: var(--coral-light);
+      color: var(--coral);
+      animation: pulse-ring 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0%,100% { box-shadow: 0 0 0 0 rgba(249,92,75,.28); }
+      50%      { box-shadow: 0 0 0 9px rgba(249,92,75,0); }
+    }
+
+    /* ── Waveform bars ───────────────────────────────── */
+    .waveform {
+      display: flex; align-items: center; gap: 2.5px; height: 18px;
+    }
+    .wb {
+      width: 3px; background: var(--coral);
+      border-radius: 3px; height: 100%;
+      transform-origin: center;
+    }
+    .wb:nth-child(1) { animation: wav .75s ease-in-out .00s infinite; }
+    .wb:nth-child(2) { animation: wav .75s ease-in-out .10s infinite; }
+    .wb:nth-child(3) { animation: wav .75s ease-in-out .20s infinite; }
+    .wb:nth-child(4) { animation: wav .75s ease-in-out .10s infinite; }
+    .wb:nth-child(5) { animation: wav .75s ease-in-out .00s infinite; }
+
+    @keyframes wav {
+      0%,100% { transform: scaleY(.3); opacity: .55; }
+      50%      { transform: scaleY(1);  opacity: 1;   }
+    }
+
+    .rec-row {
+      display: flex; align-items: center; gap: 9px; flex: 1;
+    }
+    .rec-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--coral);
+      animation: blink 1s step-end infinite;
+      flex-shrink: 0;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .rec-label { font-size: 12px; font-weight: 700; color: var(--coral); }
+    .rec-time  { font-size: 12px; font-family: 'SF Mono', monospace; color: var(--ink-3); margin-left: 2px; }
+
+    /* Stop button */
+    .stop-btn {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 99px;
+      border: 1.5px solid var(--coral);
+      background: var(--surface);
+      color: var(--coral);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .stop-btn:hover { background: var(--coral); color: #fff; }
+
+    /* Normal meta row */
+    .meta-row {
+      display: flex; align-items: center; gap: 8px; flex: 1;
+    }
+    .word-ct  { font-size: 12px; color: var(--ink-3); }
+    .lang-pill {
+      font-size: 11px; font-weight: 600;
+      padding: 2px 9px; border-radius: 99px;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      color: var(--ink-2);
+    }
+
+    .example-link {
+      font-size: 12px; color: var(--coral); font-weight: 500;
+      background: none; border: none; cursor: pointer;
+      text-decoration: underline; padding: 0;
+      transition: opacity .15s;
+    }
+    .example-link:hover { opacity: .7; }
+
+    /* ── Analyze button ──────────────────────────────── */
+    .btn-analyze {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 22px;
+      border-radius: var(--r-sm);
+      background: var(--coral);
+      color: #fff;
+      font-size: 13px; font-weight: 700;
+      border: none; cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(249,92,75,.32);
+      letter-spacing: 0.01em;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-analyze:hover {
+      background: var(--coral-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 18px rgba(249,92,75,.38);
+    }
+    .btn-analyze:active { transform: scale(.97); }
+    .btn-analyze:disabled {
+      opacity: .45; cursor: not-allowed;
+      transform: none; box-shadow: none;
+    }
+
+    /* ── Copy / secondary btn ────────────────────────── */
+    .btn-sec {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--r-xs);
+      font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: var(--stone);
+      color: var(--ink-2);
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-sec:hover { border-color: var(--ink-3); background: var(--border); }
+
+    /* ── Feedback area ───────────────────────────────── */
+    .fb-body { padding: 20px; min-height: 360px; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 44px 16px;
+    }
+    .empty-state .hero { font-size: 54px; margin-bottom: 16px; line-height: 1; }
+    .empty-state h3 {
+      font-size: 16px; font-weight: 700; color: var(--ink);
+      margin-bottom: 7px;
+    }
+    .empty-state p { font-size: 13px; color: var(--ink-3); line-height: 1.6; }
+
+    .feature-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .feat-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--paper);
+    }
+
+    .feat-icon {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+      background: var(--stone);
+    }
+
+    .feat-label { font-size: 12px; font-weight: 600; color: var(--ink-2); line-height: 1.4; }
+    .feat-sub   { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+    /* ── Skeleton loader ─────────────────────────────── */
+    .skeleton-wrap { display: flex; flex-direction: column; gap: 10px; }
+
+    .sk {
+      border-radius: var(--r-sm);
+      background: linear-gradient(90deg, #EBE6DF 25%, #E0DAD1 50%, #EBE6DF 75%);
+      background-size: 300% 100%;
+      animation: shimmer 1.6s ease-in-out infinite;
+    }
+    @keyframes shimmer { to { background-position: -300% 0; } }
+
+    /* ── Score hero ──────────────────────────────────── */
+    .score-hero {
+      display: flex; align-items: center; gap: 20px;
+      padding: 16px 20px;
+      background: var(--coral-light);
+      border: 1.5px solid #FECDCA;
+      border-radius: var(--r);
+      margin-bottom: 14px;
+    }
+
+    .score-num {
+      font-size: 46px; font-weight: 800;
+      letter-spacing: -2px; line-height: 1;
+    }
+    .score-num sup {
+      font-size: 17px; font-weight: 400;
+      opacity: .38; letter-spacing: 0;
+      vertical-align: super; margin-left: 1px;
+    }
+
+    .score-right { flex: 1; }
+    .score-bar-lbl {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--ink-3); margin-bottom: 8px;
+    }
+    .score-track {
+      height: 7px; background: #F9D6D2; border-radius: 99px; overflow: hidden;
+    }
+    .score-fill {
+      height: 100%; border-radius: 99px;
+      transition: width 1.2s cubic-bezier(.4,0,.2,1);
+    }
+    .score-sub { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+
+    /* ── Feedback section cards ──────────────────────── */
+    .sec-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      margin-bottom: 12px;
+      overflow: hidden;
+      animation: fadeUp .3s ease both;
+    }
+    .sec-card:last-child { margin-bottom: 0; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .sec-head {
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .sec-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+
+    .sec-title { font-size: 13px; font-weight: 700; flex: 1; }
+
+    .score-tag {
+      font-size: 12px; font-weight: 700;
+      padding: 4px 12px; border-radius: 99px;
+    }
+    .tag-hi  { background: #D8F3E3; color: #145E30; }
+    .tag-mid { background: #FDEFD0; color: #8A5A00; }
+    .tag-low { background: #FFE4DF; color: #9B2210; }
+
+    .sec-body {
+      padding: 13px 16px 15px;
+      font-size: 13.5px; line-height: 1.76;
+      color: var(--ink-2);
+      border-top: 1px solid rgba(0,0,0,.04);
+    }
+    .sec-body strong { color: var(--ink); font-weight: 600; }
+    .sec-body em     { color: var(--coral-dark); font-style: normal; font-weight: 500; }
+    .sec-body ul     { margin: 8px 0 8px 20px; }
+    .sec-body li     { margin-bottom: 5px; }
+    .sec-body p + p  { margin-top: 8px; }
+
+    /* ── Stream raw ──────────────────────────────────── */
+    .stream-raw {
+      font-size: 13.5px; color: var(--ink-2);
+      white-space: pre-wrap; line-height: 1.7;
+    }
+    .cursor {
+      display: inline-block; width: 2px; height: 15px;
+      background: var(--coral); vertical-align: text-bottom;
+      margin-left: 1px; animation: cur .9s step-end infinite;
+    }
+    @keyframes cur { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── Error box ───────────────────────────────────── */
+    .err-box {
+      background: var(--coral-light); border: 1.5px solid #FECDCA;
+      border-radius: var(--r-sm);
+      padding: 14px 16px; font-size: 13px; color: #9B2210;
+      display: flex; align-items: flex-start; gap: 10px; line-height: 1.6;
+    }
+
+    /* ── Voice unsupported notice ────────────────────── */
+    .voice-notice {
+      background: var(--stone); border: 1.5px solid var(--border);
+      border-radius: var(--r-sm); padding: 12px 16px;
+      font-size: 12px; color: var(--ink-2); line-height: 1.55;
+    }
+
+    /* ── Footer ──────────────────────────────────────── */
+    footer {
+      border-top: 1.5px solid var(--stone);
+      padding: 16px 24px; text-align: center;
+      font-size: 12px; color: var(--ink-3);
+      background: var(--stone);
+    }
+
+    /* ── Loading spinner ─────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin-icon {
+      display: inline-block;
+      animation: spin .65s linear infinite;
+    }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 600px) {
+      .wrap { padding: 16px 14px 36px; }
+      .api-bar { flex-wrap: wrap; }
+      .secure-note { display: none; }
+      .header-right .header-chip:last-child { display: none; }
+      .feature-grid { grid-template-columns: 1fr; }
+      textarea { min-height: 240px; font-size: 14px; }
+      .input-bar { gap: 8px; }
+    }
+
+    @media (max-width: 400px) {
+      .brand p { display: none; }
+      .header-chip { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <div class="logo-mark">🎤</div>
+    <div class="brand">
+      <h1>PresentAI</h1>
+      <p>AI-Powered Presentation Coach</p>
+    </div>
+    <div class="header-right">
+      <span class="header-chip">claude-opus-4-8</span>
+      <span class="header-chip">v2.0</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── MAIN ────────────────────────────────────────────── -->
+<div class="wrap">
+
+  <!-- API Key bar -->
+  <div class="api-bar">
+    <div class="api-icon-box">🔑</div>
+    <span class="api-label">Anthropic API Key</span>
+    <div class="api-field-wrap">
+      <input type="password" id="apiKey" class="api-field"
+             placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+      <button class="eye-toggle" onclick="toggleKey()">👁</button>
+    </div>
+    <span class="secure-note">🔒 Session only</span>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid">
+
+    <!-- LEFT: Input card -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">
+          <span class="title-icon" style="background:var(--stone)">📝</span>
+          Your Presentation
+        </span>
+        <div class="lang-switch">
+          <button class="lang-opt on" id="btnEN" onclick="setLang('en')">🇺🇸 EN</button>
+          <button class="lang-opt"    id="btnID" onclick="setLang('id')">🇮🇩 ID</button>
+        </div>
+      </div>
+
+      <textarea id="presentText"
+        placeholder="Type or paste your presentation script here…
+
+💡 Or click the 🎙 mic button below to record your voice — it will be transcribed automatically!
+
+Press Ctrl + Enter to analyze."></textarea>
+
+      <!-- Input bottom bar -->
+      <div class="input-bar">
+
+        <!-- Mic button -->
+        <button class="mic-btn" id="micBtn" onclick="toggleVoice()" title="Record voice (Chrome/Edge)">
+          🎙
+        </button>
+
+        <!-- Recording state (hidden by default) -->
+        <div id="recRow" class="rec-row" style="display:none">
+          <span class="rec-dot"></span>
+          <span class="rec-label">REC</span>
+          <div class="waveform">
+            <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+            <div class="wb"></div><div class="wb"></div>
+          </div>
+          <span class="rec-time" id="recTime">0:00</span>
+          <button class="stop-btn" onclick="stopRecording()">■ Stop &amp; Analyze</button>
+        </div>
+
+        <!-- Normal meta (shown by default) -->
+        <div id="metaRow" class="meta-row">
+          <span class="word-ct" id="wordCt">0 words</span>
+          <span class="lang-pill" id="langPill">Auto</span>
+          <button class="example-link" onclick="loadExample()">Try example</button>
+        </div>
+
+        <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">
+          ✨ Analyze
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Feedback card -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">
+          <span class="title-icon" style="background:var(--stone)">💬</span>
+          AI Feedback
+        </span>
+        <button class="btn-sec" id="copyBtn" onclick="copyFeedback()" style="display:none">
+          📋 Copy
+        </button>
+      </div>
+
+      <div class="fb-body" id="fbArea">
+        <div class="empty-state">
+          <div class="hero">🎯</div>
+          <h3>Ready to Coach You</h3>
+          <p>Type your script or record your voice,<br>then click <strong>✨ Analyze</strong> for instant AI feedback.</p>
+          <div class="feature-grid">
+            <div class="feat-card">
+              <div class="feat-icon">📊</div>
+              <div>
+                <div class="feat-label">Structure</div>
+                <div class="feat-sub">Flow & organization</div>
+              </div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-icon">💡</div>
+              <div>
+                <div class="feat-label">Clarity</div>
+                <div class="feat-sub">Language & message</div>
+              </div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-icon" style="background:#FEDDDA">🎯</div>
+              <div>
+                <div class="feat-label">Opening &amp; Closing</div>
+                <div class="feat-sub">Hook & call-to-action</div>
+              </div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-icon" style="background:#FEDDDA">🚀</div>
+              <div>
+                <div class="feat-label">Improvements</div>
+                <div class="feat-sub">Actionable suggestions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</div><!-- /wrap -->
+
+<footer>
+  PresentAI &mdash; Your AI presentation coach &nbsp;·&nbsp;
+  API key stored in session memory only, never sent to any third party
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════ */
+const SYSTEM_PROMPT = `You are an expert presentation coach with decades of experience training speakers for TED talks, business pitches, academic conferences, and public speaking competitions.
+
+When given a presentation script or speech text, analyze it thoroughly and provide structured, actionable feedback.
+
+CRITICAL: Detect the language of the presentation (Indonesian or English) and respond ENTIRELY in that same language. Do not mix languages.
+
+Format your response using these EXACT section headers — include all five, in this order:
+
+## 📊 Struktur / Structure
+Evaluate the logical flow, organization of ideas, transitions, and overall coherence. Is the structure easy to follow?
+
+## 💡 Kejelasan / Clarity
+Assess clarity, vocabulary, sentence complexity, message delivery, and audience-appropriateness.
+
+## 🎯 Opening & Closing
+Evaluate the opening hook and the closing statement/call-to-action specifically.
+
+## 🚀 Saran Perbaikan / Improvement Suggestions
+Give 4–5 specific, actionable bullet-point improvements. Quote from the text and suggest rewrites where possible.
+
+## ⭐ Penilaian Keseluruhan / Overall Assessment
+2–3 sentences of overall assessment. End with exactly: Score: X/10
+
+TONE: Encouraging and constructive. Acknowledge strengths before weaknesses. Reference specific phrases from the text.`;
+
+const SEC_CFG = [
+  { emoji:'📊', headBg:'#EEEAE4', iconBg:'#E2DDD5', titleClr:'#2C2720' },
+  { emoji:'💡', headBg:'#F5F1EC', iconBg:'#EBE5DB', titleClr:'#3D3528' },
+  { emoji:'🎯', headBg:'#FFF4F2', iconBg:'#FEDDDA', titleClr:'#B03220' },
+  { emoji:'🚀', headBg:'#FFF1EF', iconBg:'#FECDCA', titleClr:'#9B2210' },
+  { emoji:'⭐', headBg:'#FEF8EF', iconBg:'#FCE8C6', titleClr:'#8A5010' },
+];
+
+const EXAMPLES = [
+  /* English */
+  `Good morning, everyone. My name is Maya, and today I want to talk about something we all care about but rarely discuss openly: mental health in the workplace.
+
+Did you know that one in five employees experiences a mental health issue every year — yet 80% never seek help? The cost to businesses? Over $300 billion in lost productivity annually.
+
+Today I will share three strategies that helped our company reduce burnout by 40% in just six months. First: normalize the conversation. Second: build flexibility into how we work. Third: create real support systems, not just hotline numbers on a poster.
+
+Let me start with normalizing the conversation. Two years ago, our CEO shared his own anxiety story in an all-hands meeting. The effect was immediate. Help-seeking went up 60% the following quarter. Vulnerability from the top creates safety for everyone.
+
+Here is what I want you to take away today: mental health is not a personal failing — it is a workplace responsibility. And the ROI on investing in it is not just human. It is financial, it is cultural, it is strategic.
+
+Start one conversation this week. One. That is enough. Thank you.`,
+
+  /* Indonesian */
+  `Selamat pagi, Bapak dan Ibu sekalian. Nama saya Ariel Santoso, dan hari ini saya ingin berbicara tentang sesuatu yang sering kita abaikan: bagaimana cara kita berkomunikasi di era digital ini sudah mengubah hubungan kita dengan pekerjaan dan satu sama lain.
+
+Bayangkan ini: rata-rata karyawan menerima 121 email per hari. Seratus dua puluh satu. Dan kita berharap masih punya waktu untuk berpikir kreatif?
+
+Dalam presentasi ini, saya akan membahas tiga hal. Pertama, mengapa komunikasi digital yang berlebihan mematikan produktivitas. Kedua, apa yang bisa kita lakukan secara individual. Dan ketiga, perubahan budaya apa yang perlu kita dorong bersama di organisasi kita.
+
+Mari kita mulai dengan fakta yang mengejutkan. Penelitian dari University of California menemukan bahwa butuh rata-rata 23 menit untuk kembali fokus setelah terganggu oleh notifikasi. Dua puluh tiga menit! Jika Anda mendapat 20 interupsi sehari, Anda kehilangan hampir delapan jam produktivitas bersih setiap minggu.
+
+Solusinya bukan dengan berhenti berkomunikasi. Solusinya adalah berkomunikasi dengan lebih sadar dan lebih terstruktur.
+
+Saya mengajak Anda semua mulai hari ini untuk menetapkan satu aturan sederhana: tidak ada email setelah jam enam sore. Cobalah selama dua minggu. Ukur hasilnya. Saya yakin Anda akan terkejut.
+
+Terima kasih.`,
+];
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let activeLang     = 'en';
+let isRecording    = false;
+let recognition    = null;
+let recInterval    = null;
+let recSecs        = 0;
+let stableTranscript = '';
+let feedbackText   = '';
+let analyzing      = false;
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+const savedKey = sessionStorage.getItem('pai_key');
+if (savedKey) document.getElementById('apiKey').value = savedKey;
+
+document.getElementById('apiKey').addEventListener('input', e =>
+  sessionStorage.setItem('pai_key', e.target.value));
+
+document.getElementById('presentText').addEventListener('input', updateMeta);
+
+document.getElementById('presentText').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') analyze();
+});
+
+/* ═══════════════════════════════════════════════════════
+   LANGUAGE
+═══════════════════════════════════════════════════════ */
+function setLang(lang) {
+  activeLang = lang;
+  document.getElementById('btnEN').classList.toggle('on', lang === 'en');
+  document.getElementById('btnID').classList.toggle('on', lang === 'id');
+  if (recognition) recognition.lang = lang === 'id' ? 'id-ID' : 'en-US';
+  updateMeta();
+}
+
+function detectLang(text) {
+  const words = text.trim().split(/\s+/);
+  if (words.length < 5) return 'Auto';
+  const idPat = /\b(dan|yang|dengan|untuk|adalah|ini|itu|tidak|saya|kami|kita|akan|juga|dari|ke|di|pada|bisa|dapat|karena|bahwa|tetapi|namun|oleh|sebuah|sangat|lebih|sudah|telah|ada|mereka|dalam|tersebut|menjadi|bagaimana|kenapa|mengapa|penting|jika|atau|juga|harus|setiap|selalu|masih|sudah|belum)\b/gi;
+  const hits = (text.match(idPat) || []).length;
+  const ratio = hits / Math.min(words.length, 60);
+  return ratio > 0.06 ? '🇮🇩 ID' : '🇺🇸 EN';
+}
+
+function updateMeta() {
+  const v = document.getElementById('presentText').value.trim();
+  const w = v ? v.split(/\s+/).length : 0;
+  document.getElementById('wordCt').textContent   = `${w} word${w !== 1 ? 's' : ''}`;
+  document.getElementById('langPill').textContent = detectLang(v);
+}
+
+/* ═══════════════════════════════════════════════════════
+   VOICE RECORDING
+═══════════════════════════════════════════════════════ */
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (!SpeechRec) {
+  const btn = document.getElementById('micBtn');
+  btn.style.opacity = '.35';
+  btn.style.cursor  = 'not-allowed';
+  btn.title = 'Voice requires Chrome or Edge';
+  btn.onclick = () => {
+    document.getElementById('fbArea').innerHTML =
+      `<div class="voice-notice">
+        ⚠️ <strong>Voice recording is not supported in this browser.</strong><br>
+        Please use <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong> to use the microphone feature, or type your presentation manually.
+      </div>`;
+  };
+}
+
+function toggleVoice() {
+  if (!SpeechRec) return;
+  isRecording ? stopRecording() : startRecording();
+}
+
+function startRecording() {
+  recognition = new SpeechRec();
+  recognition.continuous     = true;
+  recognition.interimResults = true;
+  recognition.lang = activeLang === 'id' ? 'id-ID' : 'en-US';
+
+  stableTranscript = document.getElementById('presentText').value;
+  if (stableTranscript && !stableTranscript.endsWith('\n')) stableTranscript += '\n';
+
+  recognition.onstart = () => {
+    isRecording = true;
+    recSecs = 0;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('recRow').style.display  = 'flex';
+    document.getElementById('metaRow').style.display = 'none';
+    recInterval = setInterval(() => {
+      recSecs++;
+      const m = Math.floor(recSecs / 60);
+      const s = recSecs % 60;
+      document.getElementById('recTime').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
+  };
+
+  recognition.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        stableTranscript += e.results[i][0].transcript + ' ';
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    document.getElementById('presentText').value = (stableTranscript + interim).trimStart();
+    updateMeta();
+  };
+
+  recognition.onerror = e => {
+    if (e.error === 'not-allowed') {
+      stopRecording(false);
+      alert('Microphone access was denied. Please allow microphone access in your browser settings and try again.');
+    } else if (e.error !== 'aborted' && e.error !== 'no-speech') {
+      console.warn('Speech recognition error:', e.error);
+    }
+  };
+
+  /* Chrome stops after ~60s — restart transparently */
+  recognition.onend = () => {
+    if (isRecording) {
+      try { recognition.start(); } catch (err) { /* ignore race */ }
+    }
+  };
+
+  try {
+    recognition.start();
+  } catch (err) {
+    alert('Could not start recording: ' + err.message);
+  }
+}
+
+function stopRecording(autoAnalyze = true) {
+  isRecording = false;
+  clearInterval(recInterval);
+
+  if (recognition) {
+    recognition.onend = null; /* prevent restart */
+    try { recognition.stop(); } catch {}
+    recognition = null;
+  }
+
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('recRow').style.display  = 'none';
+  document.getElementById('metaRow').style.display = 'flex';
+
+  const textarea = document.getElementById('presentText');
+  textarea.value = stableTranscript.trim();
+  updateMeta();
+
+  if (autoAnalyze && textarea.value.trim().length > 60) {
+    setTimeout(analyze, 700);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANALYZE
+═══════════════════════════════════════════════════════ */
+async function analyze() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const text   = document.getElementById('presentText').value.trim();
+  const area   = document.getElementById('fbArea');
+
+  if (!apiKey) { showErr('Please enter your Anthropic API key above.'); return; }
+  if (!text)   { showErr('Please enter or record your presentation text first.'); return; }
+  if (text.length < 80) {
+    showErr('Your presentation is too short. Please add at least a few sentences for meaningful feedback.');
+    return;
+  }
+
+  setLoading(true);
+  document.getElementById('copyBtn').style.display = 'none';
+  feedbackText = '';
+
+  /* Skeleton loader */
+  area.innerHTML = `
+    <div class="skeleton-wrap">
+      <div class="sk" style="height:80px"></div>
+      <div class="sk" style="height:48px"></div>
+      <div class="sk" style="height:96px"></div>
+      <div class="sk" style="height:48px; width:75%"></div>
+      <div class="sk" style="height:80px"></div>
+      <div class="sk" style="height:48px; width:88%"></div>
+    </div>`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'x-api-key':     apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model:      'claude-opus-4-8',
+        max_tokens: 2048,
+        stream:     true,
+        system:     SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: `Analyze this presentation:\n\n${text}` }],
+      }),
+    });
+
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try { const j = await res.json(); msg = j?.error?.message || msg; } catch {}
+      if (res.status === 401) throw new Error('Invalid API key. Please check your Anthropic API key.');
+      if (res.status === 429) throw new Error('Rate limit reached. Please wait a moment and try again.');
+      if (res.status === 403) throw new Error('Access denied. Your key may not have permission for this model.');
+      throw new Error(`API error (${res.status}): ${msg}`);
+    }
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '', firstChunk = true;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const ev = JSON.parse(data);
+          if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') {
+            if (firstChunk) { area.innerHTML = ''; firstChunk = false; }
+            feedbackText += ev.delta.text;
+            renderFeedback(feedbackText, true);
+          }
+        } catch { /* skip malformed */ }
+      }
+    }
+
+    if (feedbackText) {
+      analyzing = false;
+      renderFeedback(feedbackText, false);
+      document.getElementById('copyBtn').style.display = '';
+    } else {
+      showErr('No response received. Please try again.');
+    }
+
+  } catch (err) {
+    showErr(err.message || 'An unexpected error occurred. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER FEEDBACK
+═══════════════════════════════════════════════════════ */
+function renderFeedback(text, streaming) {
+  const area = document.getElementById('fbArea');
+
+  /* Pre-sections: show raw stream */
+  if (!text.includes('## ')) {
+    area.innerHTML = `<div class="stream-raw">${esc(text)}${streaming ? '<span class="cursor"></span>' : ''}</div>`;
+    return;
+  }
+
+  /* Split into sections */
+  const parts = ('\n' + text).split('\n## ').slice(1);
+  let scoreVal = null;
+  let html = '';
+
+  parts.forEach((part, idx) => {
+    const nl     = part.indexOf('\n');
+    const header = nl > -1 ? part.slice(0, nl).trim() : part.trim();
+    let   body   = nl > -1 ? part.slice(nl + 1).trim() : '';
+    if (!header) return;
+
+    const cfg = SEC_CFG.find(s => header.startsWith(s.emoji)) || SEC_CFG[idx % SEC_CFG.length];
+
+    /* Score extraction */
+    let scoreHtml = '';
+    const sm = body.match(/(?:Score|Skor)\s*:\s*(\d+(?:[.,]\d+)?)\/10/i);
+    if (sm) {
+      const n = parseFloat(sm[1].replace(',', '.'));
+      const cls = n >= 7.5 ? 'tag-hi' : n >= 5 ? 'tag-mid' : 'tag-low';
+      scoreHtml = `<span class="score-tag ${cls}">⭐ ${n}/10</span>`;
+      scoreVal  = n;
+      body = body.replace(sm[0], '').trim();
+    }
+
+    html += `
+      <div class="sec-card" style="animation-delay:${idx * .07}s">
+        <div class="sec-head" style="background:${cfg.headBg}">
+          <div class="sec-icon" style="background:${cfg.iconBg}">${cfg.emoji}</div>
+          <span class="sec-title" style="color:${cfg.titleClr}">${esc(header)}</span>
+          ${scoreHtml}
+        </div>
+        ${body ? `<div class="sec-body">${fmtMd(body)}</div>` : ''}
+      </div>`;
+  });
+
+  /* Streaming cursor */
+  if (streaming) html += `<div class="stream-raw" style="margin-top:8px"><span class="cursor"></span></div>`;
+
+  /* Score hero (shown after streaming completes) */
+  let heroHtml = '';
+  if (scoreVal !== null && !streaming) {
+    const pct   = Math.round((scoreVal / 10) * 100);
+    const color = scoreVal >= 7.5 ? '#1A9456' : scoreVal >= 5 ? '#C07A00' : '#F95C4B';
+    const label = scoreVal >= 8 ? 'Excellent' : scoreVal >= 6.5 ? 'Good' : scoreVal >= 5 ? 'Needs Work' : 'Significant Improvement Needed';
+    heroHtml = `
+      <div class="score-hero">
+        <div class="score-num" style="color:${color}">${scoreVal}<sup>/10</sup></div>
+        <div class="score-right">
+          <div class="score-bar-lbl">Overall Score</div>
+          <div class="score-track"><div class="score-fill" id="scoreFill" style="width:0%;background:${color}"></div></div>
+          <div class="score-sub">${label}</div>
+        </div>
+      </div>`;
+  }
+
+  area.innerHTML = heroHtml + html;
+
+  /* Animate score bar */
+  if (scoreVal !== null && !streaming) {
+    const fill = document.getElementById('scoreFill');
+    if (fill) {
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          fill.style.width = Math.round((scoreVal / 10) * 100) + '%';
+        })
+      );
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════ */
+function esc(s) {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function fmtMd(text) {
+  return esc(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+    .replace(/^[-•]\s(.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>(\n|$))+/g, m => `<ul>${m.trim()}</ul>`)
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g,   '<br>');
+}
+
+function showErr(msg) {
+  document.getElementById('fbArea').innerHTML =
+    `<div class="err-box"><span style="font-size:18px;flex-shrink:0">⚠️</span><div>${esc(msg)}</div></div>`;
+  document.getElementById('copyBtn').style.display = 'none';
+}
+
+function setLoading(on) {
+  analyzing = on;
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled  = on;
+  btn.innerHTML = on
+    ? `<span class="spin-icon">⟳</span> Analyzing…`
+    : '✨ Analyze';
+}
+
+async function copyFeedback() {
+  try {
+    await navigator.clipboard.writeText(feedbackText);
+    const btn = document.getElementById('copyBtn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    setTimeout(() => btn.innerHTML = orig, 2000);
+  } catch {
+    alert('Copy failed — please select the text manually.');
+  }
+}
+
+function toggleKey() {
+  const f = document.getElementById('apiKey');
+  f.type = f.type === 'password' ? 'text' : 'password';
+}
+
+function loadExample() {
+  const ex = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
+  document.getElementById('presentText').value = ex;
+  updateMeta();
+  document.getElementById('presentText').focus();
+}
+</script>
+</body>
+</html>

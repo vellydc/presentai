@@ -255,6 +255,36 @@
       box-shadow: var(--sh-sm);
     }
 
+    /* ── Context selector ────────────────────────────── */
+    .context-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 12px 16px;
+      border-bottom: 1.5px solid var(--stone);
+      background: var(--paper);
+    }
+    .context-chip {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 13px;
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--ink-2);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .context-chip:hover { border-color: var(--coral); color: var(--coral-dark); }
+    .context-chip.on {
+      border-color: var(--coral);
+      background: var(--coral-light);
+      color: var(--coral-dark);
+      box-shadow: 0 0 0 3px var(--coral-glow);
+    }
+
     /* ── Textarea ────────────────────────────────────── */
     textarea {
       display: block;
@@ -665,6 +695,15 @@
         </div>
       </div>
 
+      <!-- Context selector -->
+      <div class="context-row" id="contextRow">
+        <button class="context-chip" data-ctx="academic" onclick="setContext('academic', this)">🎓 Student / Academic</button>
+        <button class="context-chip" data-ctx="professional" onclick="setContext('professional', this)">💼 Professional / Workplace</button>
+        <button class="context-chip" data-ctx="pitch" onclick="setContext('pitch', this)">🚀 Business Pitch</button>
+        <button class="context-chip" data-ctx="speaking" onclick="setContext('speaking', this)">🎤 Public Speaking</button>
+        <button class="context-chip" data-ctx="casual" onclick="setContext('casual', this)">💬 Casual / Daily</button>
+      </div>
+
       <textarea id="presentText"
         placeholder="Type or paste your presentation script here…
 
@@ -712,9 +751,14 @@ Press Ctrl + Enter to analyze."></textarea>
           <span class="title-icon" style="background:var(--stone)">💬</span>
           AI Feedback
         </span>
-        <button class="btn-sec" id="copyBtn" onclick="copyFeedback()" style="display:none">
-          📋 Copy
-        </button>
+        <div style="display:flex; gap:8px">
+          <button class="btn-sec" id="ttsBtn" onclick="toggleTTS()" style="display:none">
+            🔊 Listen
+          </button>
+          <button class="btn-sec" id="copyBtn" onclick="copyFeedback()" style="display:none">
+            📋 Copy
+          </button>
+        </div>
       </div>
 
       <div class="fb-body" id="fbArea">
@@ -772,7 +816,11 @@ const SYSTEM_PROMPT = `You are an expert presentation coach with decades of expe
 
 When given a presentation script or speech text, analyze it thoroughly and provide structured, actionable feedback.
 
-CRITICAL: Detect the language of the presentation (Indonesian or English) and respond ENTIRELY in that same language. Do not mix languages.
+CRITICAL — LANGUAGE: Presentations may be in English, Indonesian, or a casual mix of both (e.g. Indonesian-English slang / "bahasa gaul campuran"), and may include regional or informal expressions. Do NOT be rigid about strict language separation. Read the speaker's dominant tone and style, then respond in that SAME style:
+- If they write fully in formal Indonesian → respond in formal Indonesian.
+- If they write fully in English → respond in English.
+- If they write in a casual mix of Indonesian and English (code-switching/slang) → respond in a similarly natural, friendly mixed style — don't force everything into one language.
+The goal is feedback that feels natural, relatable, and matches how the speaker actually talks — never robotic or artificially monolingual.
 
 Format your response using these EXACT section headers — include all five, in this order:
 
@@ -842,6 +890,16 @@ let recSecs        = 0;
 let stableTranscript = '';
 let feedbackText   = '';
 let analyzing      = false;
+let selectedContext = null;
+let isSpeaking     = false;
+
+const CONTEXT_LABELS = {
+  academic:     'Student / Academic presentation (e.g. class assignment, thesis defense, seminar)',
+  professional: 'Professional / Workplace presentation (e.g. team update, report, internal meeting)',
+  pitch:        'Business Pitch (e.g. startup pitch, sales pitch, investor presentation)',
+  speaking:     'Public Speaking event (e.g. conference talk, keynote, ceremony speech)',
+  casual:       'Casual / Daily talk (e.g. informal sharing, everyday conversation, low-stakes setting)',
+};
 
 /* ═══════════════════════════════════════════════════════
    INIT
@@ -994,6 +1052,17 @@ function stopRecording(autoAnalyze = true) {
 /* ═══════════════════════════════════════════════════════
    ANALYZE
 ═══════════════════════════════════════════════════════ */
+function setContext(key, btn) {
+  const same = selectedContext === key;
+  document.querySelectorAll('.context-chip').forEach(c => c.classList.remove('on'));
+  if (same) {
+    selectedContext = null;
+  } else {
+    selectedContext = key;
+    btn.classList.add('on');
+  }
+}
+
 async function analyze() {
   const apiKey = document.getElementById('apiKey').value.trim();
   const text   = document.getElementById('presentText').value.trim();
@@ -1006,8 +1075,13 @@ async function analyze() {
     return;
   }
 
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  isSpeaking = false;
+  updateTTSBtn();
+
   setLoading(true);
   document.getElementById('copyBtn').style.display = 'none';
+  document.getElementById('ttsBtn').style.display = 'none';
   feedbackText = '';
 
   /* Skeleton loader */
@@ -1035,7 +1109,9 @@ async function analyze() {
         max_tokens: 2048,
         stream:     true,
         system:     SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: `Analyze this presentation:\n\n${text}` }],
+        messages: [{ role: 'user', content: selectedContext
+          ? `Analyze this presentation. Context: ${CONTEXT_LABELS[selectedContext]}. Tailor your feedback and tone to this context.\n\n${text}`
+          : `Analyze this presentation:\n\n${text}` }],
       }),
     });
 
@@ -1079,6 +1155,7 @@ async function analyze() {
       analyzing = false;
       renderFeedback(feedbackText, false);
       document.getElementById('copyBtn').style.display = '';
+      document.getElementById('ttsBtn').style.display = '';
     } else {
       showErr('No response received. Please try again.');
     }
@@ -1197,6 +1274,48 @@ function showErr(msg) {
   document.getElementById('fbArea').innerHTML =
     `<div class="err-box"><span style="font-size:18px;flex-shrink:0">⚠️</span><div>${esc(msg)}</div></div>`;
   document.getElementById('copyBtn').style.display = 'none';
+  document.getElementById('ttsBtn').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════════════
+   TEXT-TO-SPEECH
+═══════════════════════════════════════════════════════ */
+function toggleTTS() {
+  const synth = window.speechSynthesis;
+  if (!synth) { alert('Sorry, text-to-speech is not supported in this browser.'); return; }
+
+  if (isSpeaking) {
+    synth.cancel();
+    isSpeaking = false;
+    updateTTSBtn();
+    return;
+  }
+
+  const cleanText = feedbackText
+    .replace(/^##\s*.*$/gm, m => m.replace(/##\s*/, '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu, '') + '.')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu, '')
+    .replace(/(?:Score|Skor)\s*:\s*\d+(?:[.,]\d+)?\/10/gi, '')
+    .trim();
+
+  if (!cleanText) return;
+
+  const utter = new SpeechSynthesisUtterance(cleanText);
+  utter.lang = activeLang === 'id' ? 'id-ID' : 'en-US';
+  utter.rate = 1;
+  utter.onend   = () => { isSpeaking = false; updateTTSBtn(); };
+  utter.onerror = () => { isSpeaking = false; updateTTSBtn(); };
+
+  isSpeaking = true;
+  updateTTSBtn();
+  synth.speak(utter);
+}
+
+function updateTTSBtn() {
+  const btn = document.getElementById('ttsBtn');
+  if (!btn) return;
+  btn.innerHTML = isSpeaking ? '⏸ Stop' : '🔊 Listen';
 }
 
 function setLoading(on) {

@@ -6,7 +6,7 @@
   <title>VocaLift – AI Presentation Coach</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ── Design tokens ─────────────────────────────── */
     :root {
@@ -39,9 +39,9 @@
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-weight: 400;
-      background: var(--paper);
+      font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F65D4C 55%, #FEB261 100%);
       color: var(--ink);
       min-height: 100vh;
       display: flex;
@@ -80,9 +80,9 @@
     .logo-mark .icon { width: 20px; height: 20px; }
 
     .brand h1 {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Quicksand', sans-serif;
       font-size: 28px;
-      font-weight: 800;
+      font-weight: 700;
       color: #fff;
       letter-spacing: -0.5px;
       line-height: 1.1;
@@ -146,7 +146,7 @@
     .api-icon-box .icon { width: 17px; height: 17px; }
 
     .api-label {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Quicksand', sans-serif;
       font-size: 13px;
       font-weight: 600;
       color: var(--ink-2);
@@ -194,14 +194,9 @@
 
     /* ── Grid ────────────────────────────────────────── */
     .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 20px;
-      align-items: start;
-    }
-
-    @media (max-width: 880px) {
-      .grid { grid-template-columns: 1fr; }
     }
 
     /* ── Card ────────────────────────────────────────── */
@@ -214,7 +209,7 @@
     }
 
     .card-feedback {
-      background: var(--stone);
+      background: #FEB261;
     }
 
     .card-head {
@@ -227,7 +222,7 @@
     }
 
     .card-title {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Quicksand', sans-serif;
       font-size: 15px;
       font-weight: 700;
       color: var(--ink);
@@ -291,20 +286,20 @@
       padding: 7px 15px;
       border-radius: 99px;
       border: none;
-      background: #A3BEBC;
+      background: #807b71;
       color: #fff;
       cursor: pointer;
       transition: all .15s;
       white-space: nowrap;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Quicksand', sans-serif;
     }
-    .context-chip .icon { width: 14px; height: 14px; opacity: .65; }
-    .context-chip:hover { background: #B4B4B4; color: #000; }
+    .context-chip .icon { width: 14px; height: 14px; opacity: .8; }
+    .context-chip:hover { background: #6e6960; color: #fff; }
     .context-chip:hover .icon { opacity: 1; }
     .context-chip.on .icon { opacity: 1; }
     .context-chip.on {
       border: none;
-      background: var(--coral);
+      background: #F95C4B;
       color: #fff;
     }
 
@@ -321,7 +316,7 @@
       font-weight: 400;
       line-height: 1.85;
       color: var(--ink);
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      font-family: 'Quicksand', -apple-system, sans-serif;
       background: transparent;
       letter-spacing: 0.005em;
     }
@@ -412,7 +407,7 @@
       cursor: pointer;
       transition: all .15s;
       white-space: nowrap;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Quicksand', sans-serif;
     }
     .stop-btn .icon { width: 11px; height: 11px; }
     .stop-btn:hover { background: var(--coral-dark); border-color: var(--coral-dark); color: #fff; }
@@ -451,7 +446,7 @@
       white-space: nowrap;
       box-shadow: 0 2px 10px rgba(0,0,0,.12);
       letter-spacing: 0.01em;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Quicksand', sans-serif;
     }
     .btn-analyze .icon { width: 14px; height: 14px; }
     .btn-analyze:hover {
@@ -476,7 +471,7 @@
       color: var(--ink-2);
       cursor: pointer;
       transition: all .15s;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Quicksand', sans-serif;
     }
     .btn-sec .icon { width: 13px; height: 13px; }
     .btn-sec:hover { border-color: var(--ink-3); background: var(--border); }
@@ -490,8 +485,8 @@
       padding: 48px 18px;
     }
     .empty-state h3 {
-      font-family: 'Poppins', sans-serif;
-      font-size: 26px; font-weight: 800; color: var(--ink);
+      font-family: 'Quicksand', sans-serif;
+      font-size: 26px; font-weight: 700; color: #807b71;
       margin-bottom: 10px;
       letter-spacing: -0.5px;
     }
@@ -512,7 +507,7 @@
       display: flex;
       align-items: flex-start;
       gap: 11px;
-      background: #B4B4B4;
+      background: #EEE2D1;
     }
 
     .feat-icon {
@@ -551,7 +546,7 @@
     }
 
     .score-num {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Quicksand', sans-serif;
       font-size: 48px; font-weight: 800;
       letter-spacing: -2px; line-height: 1;
     }
@@ -603,7 +598,7 @@
     .sec-icon .icon { width: 16px; height: 16px; }
 
     .sec-title {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Quicksand', sans-serif;
       font-size: 13.5px; font-weight: 700; flex: 1;
       letter-spacing: -0.1px;
     }
